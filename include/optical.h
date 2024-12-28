@@ -1,7 +1,12 @@
 class OpticsHandler {
     private:
-        pros::ADIAnalogIn &opticalSensor;
-        bool triggered;
+        pros::Optical &opticalSensor;
+        pros::MotorGroup &intake;
+        pros::Controller &controller;
+        teamColour colour;
     public:
-        OpticsHandler(pros::ADIAnalogIn &opticalSensor);
-}
+        OpticsHandler(pros::Optical &opticalSensor, pros::MotorGroup &intake, pros:: Controller &controller, teamColour colour);
+
+        void colourFilter();
+};
+ 

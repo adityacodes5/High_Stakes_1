@@ -8,7 +8,7 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup leftMotors({-3, -2, -4},
                             pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
 pros::MotorGroup rightMotors({8, 9, 10}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
-pros::MotorGroup armMotors({11, -20}, pros::MotorGearset::rpm_200);
+pros::MotorGroup armMotors({11, -20}, pros::MotorGearset::green);
 pros::MotorGroup intake({19}, pros::MotorGearset::blue);
 
 pros::adi::Pneumatics clampPiston = pros::adi::Pneumatics('A', false);
@@ -16,10 +16,12 @@ pros::adi::Pneumatics doinkerPiston = pros::adi::Pneumatics('G', false);
 
 pros::Optical opticalSensor(18);
 
+
+
 // Inertial Sensor on port 10
 pros::Imu imu(6);
 
-
+OpticsHandler opticsHandler(opticalSensor, intake, controller, teamColour::blue);
 
 //// tracking wheels
 //// horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
@@ -93,36 +95,6 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
-void intakeStallRecovery() {
-    const int STALL_THRESHOLD = 5; // Speed (rpm) considered "stalled"
-    const int STALL_TIME_MS = 250; // How long (in ms) of near-zero speed to be considered "stalled"
-    const int JIGGLE_DURATION = 250; // How long to reverse the intake (in ms)
-    const int JIGGLE_POWER = -127; // Power to use for jiggle back-and-forth
-    const int NORMAL_POWER = 127; // Default intake power
-
-    while (true) {
-        // Check motor velocity to see if it's stalled
-        double intakeVelocity = intake.get_actual_velocity();
-
-        // If velocity is low but motor is supposed to be running
-        if (fabs(intakeVelocity) < STALL_THRESHOLD && fabs(intake.get_voltage()) > 2000) {
-            pros::delay(STALL_TIME_MS); // Wait to ensure it's truly stalled
-
-            // Double-check after delay to confirm stall
-            intakeVelocity = intake.get_actual_velocity();
-            if (fabs(intakeVelocity) < STALL_THRESHOLD) {
-                // Perform back-and-forth motion to free up the blockage
-                intake.move(JIGGLE_POWER); // Move backward
-                pros::delay(JIGGLE_DURATION);
-                intake.move(NORMAL_POWER); // Move forward
-                pros::delay(JIGGLE_DURATION);
-            }
-        }
-        
-        pros::delay(50); // Reduce CPU load
-    }
-}
 
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
@@ -283,8 +255,16 @@ void progSkills(){
     chassis.moveToPose(128, -72, 225, 4000, {.forwards = false, .maxSpeed = 60});
 }
 
+void recoverIntake(){
+    intakeStallRecovery(intake);
+}
+
+void colourSort(){
+    opticsHandler.colourFilter();
+}
+
 void autonomous() {
-    pros::Task intakeStallTask =  pros::Task(intakeStallRecovery); 
+    pros::Task intakeStallTask =  pros::Task(recoverIntake); 
 
     //chassis.resetLocalPosition();  // Reset odometry
     //imu.reset(); // Reset the IMU
@@ -327,10 +307,13 @@ void opcontrol() {
     bool isMovingToPosition = false; // Flag to track if the arm is moving to a set position
     const int HARD_STOP_POSITION = -2000; // Hard stop limit
 
+    pros::Task colourSortTask =  pros::Task(colourSort); 
+
     // controller
     // loop to continuously update motors
     while (true) {
         // get joystick positions
+
 		printf("Hello World!");
         int leftX = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
@@ -360,9 +343,12 @@ void opcontrol() {
     else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
         if (armTriggered || armPosition < -50) {
             armMotors.move_absolute(0, 50); // Move to 0 absolute position
+            if(armMotors.get_voltage() > 5000) {
+                armMotors.move_velocity(0);
+            }
         } else {
             // Calculate the target position for move_relative
-            int targetPosition = armPosition - 300;
+            int targetPosition = armPosition - 320;
             if (targetPosition < HARD_STOP_POSITION) targetPosition = HARD_STOP_POSITION; // Clamp to -2000
             armMotors.move_absolute(targetPosition, 50); // Move to the clamped position
         }
@@ -394,18 +380,7 @@ void opcontrol() {
     }
 
         
-
-        if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            intake.move(128);
-            intakeTriggered = true;
-        }
-        else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            intake.move(-128);
-        }
-        else{
-            intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-            intake.brake();
-        }
+        
 
 
         if(controller.get_digital(DIGITAL_Y) && !clampTriggered) {

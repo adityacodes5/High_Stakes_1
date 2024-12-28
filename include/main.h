@@ -26,6 +26,11 @@
  */
 #define PROS_USE_SIMPLE_NAMES
 
+enum teamColour{
+    neutral,
+    red,
+    blue
+};
 /**
  * If defined, C++ literals will be available for use. All literals are in the
  * pros::literals namespace.
@@ -36,8 +41,7 @@
 
 #include "api.h"
 #include "optical.h"
-//#include "pid.h"
-//#include "controllerHandler.h"
+#include "custom.h"
 
 /**
  * You should add more #includes here
