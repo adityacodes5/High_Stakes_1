@@ -1,0 +1,1 @@
+OpticsHandler(pros::ADIAnalogIn &opticalSensor) : opticalSensor(opticalSensor) {}
