@@ -26,10 +26,17 @@
  */
 #define PROS_USE_SIMPLE_NAMES
 
+
 enum teamColour{
     neutral,
     red,
     blue
+};
+
+enum gameMode{
+    tournament,
+    skills,
+    testing
 };
 /**
  * If defined, C++ literals will be available for use. All literals are in the
@@ -40,8 +47,11 @@ enum teamColour{
 #define PROS_USE_LITERALS
 
 #include "api.h"
+#include "lemlib/api.hpp"
 #include "optical.h"
 #include "custom.h"
+#include "autonomous.h"
+#include "arm.h"
 
 /**
  * You should add more #includes here
