@@ -10,7 +10,7 @@ class ArmHandler {
     
         bool isBraked = false;
         bool isMovingToPosition = false;
-        const int HARD_STOP_POSITION = -2000;
+        const int HARD_STOP_POSITION = -5000;
     public:
         ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors);
     

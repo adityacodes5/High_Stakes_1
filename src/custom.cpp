@@ -2,7 +2,7 @@
 
 void intakeStallRecovery(pros::v5::MotorGroup &intake) {
     const int STALL_THRESHOLD = 5; // rpm
-    const int STALL_TIME_MS = 250; // detection time (ms)
+    const int STALL_TIME_MS = 100; // detection time (ms)
     const int JIGGLE_DURATION = 250; // time to reverse (ms)
     const int JIGGLE_POWER = -128; // strength of "jiggle"
     const int NORMAL_POWER = 128; // default intake power
