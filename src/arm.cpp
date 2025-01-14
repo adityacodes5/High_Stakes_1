@@ -15,7 +15,7 @@ void ArmHandler::update() {
     } else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
         // Reset the motor's position to 0 and move 320 degrees relative to the new zero
         armMotors.tare_position(); // Reset encoder position to 0
-        armMotors.move_relative(-320, 50); // Move 320 degrees relative at 50 rpm
+        armMotors.move_relative(-355, 70); // Move 320 degrees relative at 50 rpm
         isMovingToPosition = true;
         isBraked = false;
     } else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {

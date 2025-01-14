@@ -15,14 +15,16 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 pros::MotorGroup leftMotors({-3, -2, -4},pros::MotorGearset::blue); 
 pros::MotorGroup rightMotors({8, 9, 10}, pros::MotorGearset::blue); 
-pros::MotorGroup armMotors({11, -20}, pros::MotorGearset::green);
-pros::MotorGroup intake({19}, pros::MotorGearset::blue);
+pros::MotorGroup armMotors({20}, pros::MotorGearset::green);
+pros::MotorGroup intake({11, 19}, pros::MotorGearset::blue);
 
 pros::adi::Pneumatics clampPiston = pros::adi::Pneumatics('A', false);
 pros::adi::Pneumatics doinkerPiston = pros::adi::Pneumatics('G', false);
 
 pros::Optical opticalSensor(18);
 pros::Imu imu(6);
+
+pros::Rotation angularWheel = pros::Rotation(17);
 
 pros::adi::DigitalIn bumper = pros::adi::DigitalIn('H');
 
@@ -63,6 +65,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0 // maximum acceleration (slew)
 );
 
+lemlib::TrackingWheel horizontal_tracking_wheel(&angularWheel, lemlib::Omniwheel::NEW_2,-1.74);
 // sensors for odometry
 lemlib::OdomSensors sensors(nullptr,
 							nullptr,
@@ -93,6 +96,16 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
  * to keep execution time for this mode under a few seconds.
  */
 
+
+double startValue;
+
+double calibrateTracker(){
+    double currentValue = startValue - angularWheel.get_position();
+    double distTraveled = currentValue * 2 * 3.14 / 36000;
+    double radius = distTraveled / (chassis.getPose().theta * M_PI / 180);
+    return radius;
+}
+
 void colourSort(){
 
     opticsHandler.colourFilter();
@@ -104,7 +117,9 @@ void initialize() {
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(true); // calibrate sensors
     chassis.resetLocalPosition(); // reset odometry
+    angularWheel.reset(); 
     opticalSensor.set_integration_time(20);
+    startValue = angularWheel.get_angle();
 
 
     
@@ -125,6 +140,9 @@ void initialize() {
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
             pros::lcd::print(3, "Arm Position: %f", armMotors.get_position());
             pros::lcd::print(4, "Auto: %s", autonNames[selection].c_str());
+            pros::lcd::print(5, "Tracking wheel: %f", startValue - angularWheel.get_angle());
+            pros::lcd::print(6, "Calculated Radius: %f", calibrateTracker());
+
 
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
 
@@ -164,7 +182,7 @@ void initialize() {
                     break;
             }
 
-            controller.print(0, 0, std::string(modeString + " " + colourString + std::to_string(intake.get_voltage())).c_str());
+            controller.print(0, 0, std::string(modeString + " " + colourString).c_str());
 
          pros::delay(50);
  	}
@@ -287,15 +305,40 @@ void newBlueRight(){
     chassis.moveToPoint(25, -5, 750, {.forwards = false, .minSpeed = 70});
     chassis.moveToPoint(26, -32, 750, {.minSpeed = 70} );
     pros::delay(500);
-    armMotors.move_relative(-1500, 80);
 }
+
+void newProgSkills(){
+    chassis.setPose(0, -61.5, 0);
+    intake.move(128);
+    pros::delay(1000);
+    intake.move(0);
+    chassis.moveToPoint(0, -50, 2000);
+    chassis.turnToHeading(270, 1200);
+    chassis.moveToPose(32, -48, 270, 2000, {.forwards = false, .maxSpeed = 60});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(128);
+    chassis.moveToPoint(24, -24, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPoint(52, -24, 2500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPose(48, -36, 180, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPoint(48, -65, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPoint(48, -48, 1500, {.forwards = false, .minSpeed = 40});
+    chassis.moveToPoint(56, -48, 1500, {.minSpeed = 40});
+    chassis.swingToHeading(315, DriveSide::RIGHT, 1500);
+    chassis.moveToPoint(64, -62, 1500, {.forwards = false, .minSpeed = 40});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+
+}
+
+
 
 void autonomous() {
     pros::Task intakeStallTask =  pros::Task(recoverIntake); 
 
     switch(selection){
         case 0:
-            newBlueRight(); //TEMPORARY
+            newProgSkills(); //TEMPORARY
             break;
         case 1:
             blueLeft();
@@ -321,6 +364,8 @@ void opcontrol() {
     if(!isGameInit){
         gameInit(teamColour::neutral, false);
     }
+
+    angularWheel.set_position(0);
 
     while (true) {
 
