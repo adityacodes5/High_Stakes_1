@@ -25,6 +25,7 @@ pros::Optical opticalSensor(18);
 pros::Imu imu(6);
 
 pros::Rotation angularWheel = pros::Rotation(17);
+pros::MotorGroup roller({11}, pros::MotorGearset::green);
 
 pros::adi::DigitalIn bumper = pros::adi::DigitalIn('H');
 
@@ -65,11 +66,11 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0 // maximum acceleration (slew)
 );
 
-lemlib::TrackingWheel horizontal_tracking_wheel(&angularWheel, lemlib::Omniwheel::NEW_2,-1.74);
+lemlib::TrackingWheel horizontal_tracking_wheel(&angularWheel, lemlib::Omniwheel::NEW_2,-1.59);
 // sensors for odometry
 lemlib::OdomSensors sensors(nullptr,
 							nullptr,
-							nullptr,
+							nullptr,//&horizontal_tracking_wheel,
 							nullptr,
                             &imu // inertial sensor
 );
@@ -230,10 +231,10 @@ void gameInit(teamColour colour, bool isAuton = true){
 
 void redMogoRush(){
     gameInit(teamColour::red);
-    chassis.moveToPoint(0, 36, 1500, {.minSpeed = 60});
+    chassis.moveToPoint(0, 36, 1250, {.minSpeed = 70});
     chassis.turnToPoint(-7, 55, 500);
     doinkerPiston.toggle();
-    chassis.turnToHeading(270, 800, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE, .minSpeed = 30});
+    chassis.turnToHeading(270, 500, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE, .minSpeed = 50});
     chassis.waitUntil(50);
     doinkerPiston.toggle();
     chassis.turnToHeading(290, 500);
@@ -264,27 +265,28 @@ void redMogoRush(){
 
 }
 
-void redWallRush(){
-    chassis.moveToPose(2, -24, 330, 4000, {.forwards = false});
-    chassis.waitUntilDone();
-    pros::delay(500);
-    clampPiston.toggle();   
-    pros::delay(250);
-    intake.move(128);
-    pros::delay(250);
-    chassis.moveToPose(-24, -31.5, 270, 4000, {.maxSpeed=50});
-    chassis.waitUntilDone();
-    chassis.moveToPose(-24, -3 , 0, 4000);
-    chassis.swingToHeading(305, DriveSide::LEFT, 2000);
-    chassis.waitUntilDone();
-    doinkerPiston.toggle();
-    pros::delay(250);
-    chassis.turnToHeading(0, 2000);
-    chassis.waitUntil(30);
-    doinkerPiston.toggle();
-    chassis.swingToHeading(315, DriveSide::LEFT, 2000);
-
-}
+//void redWallRush(){
+//    gameInit(teamColour::red);
+//    chassis.moveToPose(2, -24, 330, 4000, {.forwards = false});
+//    chassis.waitUntilDone();
+//    pros::delay(500);
+//    clampPiston.toggle();   
+//    pros::delay(250);
+//    intake.move(128);
+//    pros::delay(250);
+//    chassis.moveToPose(-24, -31.5, 270, 4000, {.maxSpeed=50});
+//    chassis.waitUntilDone();
+//    chassis.moveToPose(-24, -3 , 0, 4000);
+//    chassis.swingToHeading(305, DriveSide::LEFT, 2000);
+//    chassis.waitUntilDone();
+//    doinkerPiston.toggle();
+//    pros::delay(250);
+//    chassis.turnToHeading(0, 2000);
+//    chassis.waitUntil(30);
+//    doinkerPiston.toggle();
+//    chassis.swingToHeading(315, DriveSide::LEFT, 2000);
+//
+//}
 
 void newBlueRight(){
     gameInit(teamColour::blue);
@@ -307,6 +309,27 @@ void newBlueRight(){
     pros::delay(500);
 }
 
+void newRedLeft(){
+    gameInit(teamColour::red);
+    chassis.moveToPose(-2, -24, 25, 1250, {.forwards = false});
+    chassis.moveToPoint(-6, -28, 400, {.forwards = false});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    pros::delay(150);
+    intake.move(128);
+    chassis.moveToPoint(22, -28, 2000, {.maxSpeed = 60});
+    chassis.moveToPose(22, -44.5, 180, 4000, {.maxSpeed = 55});
+    chassis.moveToPoint(22, -35, 1500, {.forwards = false});
+    chassis.moveToPose(14, -44.5, 180, 1750, {.maxSpeed = 55});
+    chassis.waitUntilDone();
+    chassis.moveToPoint(15, -35, 900, {.forwards = false, .minSpeed = 80});
+    chassis.moveToPoint(-25, -5, 750, {.minSpeed = 80});
+    chassis.moveToPose(-50, -5, 270, 2500, {.maxSpeed = 40});
+    chassis.moveToPoint(-25, -5, 750, {.forwards = false, .minSpeed = 70});
+    chassis.moveToPoint(-26, -32, 750, {.minSpeed = 70} );
+    pros::delay(500);
+}
+
 void newProgSkills(){
     chassis.setPose(0, -61.5, 0);
     intake.move(128);
@@ -319,15 +342,108 @@ void newProgSkills(){
     clampPiston.toggle();
     intake.move(128);
     chassis.moveToPoint(24, -24, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.turnToPoint(48, -24, 1000);
     chassis.moveToPoint(52, -24, 2500, {.maxSpeed = 60, .minSpeed = 40});
     chassis.moveToPose(48, -36, 180, 1500, {.maxSpeed = 60, .minSpeed = 40});
-    chassis.moveToPoint(48, -65, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPoint(48, -66, 1500, {.maxSpeed = 60, .minSpeed = 40});
     chassis.moveToPoint(48, -48, 1500, {.forwards = false, .minSpeed = 40});
-    chassis.moveToPoint(56, -48, 1500, {.minSpeed = 40});
+    chassis.moveToPoint(60, -48, 1500, {.maxSpeed = 70, .minSpeed = 40});
     chassis.swingToHeading(315, DriveSide::RIGHT, 1500);
-    chassis.moveToPoint(64, -62, 1500, {.forwards = false, .minSpeed = 40});
+    chassis.moveToPoint(64, -62, 1000, {.forwards = false, .minSpeed = 40});
     chassis.waitUntilDone();
     clampPiston.toggle();
+    intake.move(0);
+    
+    chassis.moveToPose(12, -50, 90, 2000, {.forwards = false, .minSpeed = 60});
+    chassis.moveToPose(-32, -48, 90, 2000, {.forwards = false, .maxSpeed = 60});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(128);
+    chassis.moveToPoint(-24, -24, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.turnToPoint(-48, -24, 1000);
+    chassis.moveToPoint(-52, -24, 2500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPose(-48, -36, 180, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPoint(-48, -66, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.moveToPoint(-48, -48, 1500, {.forwards = false, .minSpeed = 40});
+    chassis.moveToPoint(-60, -48, 1500, {.maxSpeed = 70, .minSpeed = 40});
+    chassis.swingToHeading(45, DriveSide::LEFT, 1500);
+    chassis.moveToPoint(-64, -62, 1000, {.forwards = false, .minSpeed = 40});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(0);
+
+}
+
+void evenNewerSkills(){
+    chassis.setPose(-61.5, 0, 90);
+    intake.move(128);
+    pros::delay(1000);
+    intake.move(0);
+    chassis.moveToPoint(-54, 0, 2000);
+    chassis.turnToHeading(0, 1200);
+    chassis.moveToPose(-48, -32, 0, 2000, {.forwards = false, .maxSpeed = 60});
+
+    chassis.waitUntil(30);
+    clampPiston.toggle();
+    intake.move(128);
+    chassis.moveToPoint(-24, -24, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.turnToPoint(-2, -51, 1000);
+    chassis.moveToPoint(-2, -51, 2000, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.waitUntilDone();
+    pros::delay(500);
+    chassis.moveToPoint(0, -46, 2000, {.forwards = false});
+    chassis.moveToPoint(-18, -48, 2000, {.maxSpeed = 65});
+    chassis.moveToPose(-58, -48, 270, 2000, {.maxSpeed = 45});
+    chassis.moveToPoint(-48, -48, 2250, {.forwards = false, .minSpeed = 40});
+    chassis.turnToPoint(-48, -60, 1500);
+    chassis.moveToPoint(-46, -61, 2250, {.minSpeed = 40});
+    chassis.swingToHeading(45, DriveSide::RIGHT, 1500);
+    chassis.moveToPoint(-58, -60, 1500, {.forwards = false, .minSpeed = 30});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(-128);
+    pros::delay(250);
+    intake.move(0);
+
+    chassis.moveToPoint(-54, 0, 2000);
+    chassis.moveToPose(-48, 26, 190, 2000, {.forwards = false, .maxSpeed = 60});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(128);
+
+    chassis.moveToPoint(-24, 24, 1500, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.turnToPoint(0, 52, 1000);
+    chassis.moveToPoint(0, 52, 2000, {.maxSpeed = 60, .minSpeed = 40});
+    chassis.waitUntilDone();
+    pros::delay(500);
+    chassis.moveToPoint(0, 46, 2000, {.forwards = false});
+    chassis.moveToPoint(-18, 48, 2000, {.maxSpeed = 65});
+    chassis.moveToPose(-58, 48, 270, 2000, {.maxSpeed = 45});
+    chassis.moveToPoint(-48, 48, 2250, {.forwards = false, .minSpeed = 40});
+    chassis.turnToPoint(-48, 60, 1500);
+    chassis.moveToPoint(-46, 61, 2250, {.minSpeed = 40});
+    chassis.swingToHeading(135, DriveSide::RIGHT, 1500);
+    chassis.moveToPoint(-58, 60, 1500, {.forwards = false, .minSpeed = 30});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(-128);
+    pros::delay(250);
+    intake.move(0);
+    roller.move(128);
+
+    //pros::delay(200);
+//
+    //chassis.moveToPoint(26, 50, 3500, {.maxSpeed = 80, .minSpeed = 40});
+    //chassis.moveToPose(50, -3, 45, 3500, {.forwards = false, .maxSpeed = 50});
+    //chassis.waitUntilDone();
+    //clampPiston.toggle();
+    //roller.move(0);
+    //intake.move(128);
+//
+    //chassis.moveToPoint(48, 62, 2000, {.maxSpeed = 80, .minSpeed = 40});
+
+
+
 
 }
 
@@ -338,16 +454,16 @@ void autonomous() {
 
     switch(selection){
         case 0:
-            newProgSkills(); //TEMPORARY
+            redMogoRush(); //TEMPORARY
             break;
         case 1:
-            blueLeft();
+            newBlueRight();
             break;
         case 2:
-            redRight();
+            newRedLeft();
             break;
         case 3:
-            redLeft();
+            blueLeft();
             break;
         case 4:
             progSkills();
@@ -383,6 +499,14 @@ void opcontrol() {
 
         controller.get_digital_new_press(DIGITAL_Y) ? clampPiston.toggle() : 0; 
         controller.get_digital_new_press(DIGITAL_A) ? doinkerPiston.toggle() : 0;
+
+        if(controller.get_digital_new_press(DIGITAL_B)){
+            leftMotors.move_velocity(-64);
+            rightMotors.move_velocity(64);
+            pros::delay(5000);
+            leftMotors.move_velocity(0);
+            rightMotors.move_velocity(0);
+        }
         
         pros::delay(10);
 
