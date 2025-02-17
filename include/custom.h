@@ -1,6 +1,16 @@
 #ifndef _CUSTOM_H_
 #define _CUSTOM_H_
 
-extern void intakeStallRecovery(pros::v5::MotorGroup &intake);
+class IntakeHandler{
+    private:
+        pros::v5::MotorGroup &intake;
+    public:
+
+        bool disable = false;
+        
+        IntakeHandler(pros::v5::MotorGroup &intake);
+        void intakeStallRecovery();
+};
+
 
 #endif // _CUSTOM_H_

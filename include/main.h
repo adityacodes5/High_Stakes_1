@@ -38,6 +38,7 @@ enum gameMode{
     skills,
     testing
 };
+
 /**
  * If defined, C++ literals will be available for use. All literals are in the
  * pros::literals namespace.

@@ -1,6 +1,6 @@
 #include "main.h"
 
-OpticsHandler::OpticsHandler(pros::Optical &opticalSensor, pros::MotorGroup &intake, pros::Controller &controller, teamColour colour) : opticalSensor(opticalSensor), intake(intake), controller(controller), colour(colour) {};
+OpticsHandler::OpticsHandler(pros::Optical &opticalSensor, pros::MotorGroup &intake, pros::MotorGroup &roller, pros::Controller &controller, teamColour colour) : opticalSensor(opticalSensor), intake(intake), roller(roller),controller(controller), colour(colour) {};
 
 void OpticsHandler::colourFilter() {
 
@@ -14,6 +14,9 @@ void OpticsHandler::colourFilter() {
         else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
             intake.move(-128);
         }
+        else if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
+            roller.move(128);
+        }
         else{
             if(!isAuton){
                 intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -23,6 +26,8 @@ void OpticsHandler::colourFilter() {
                 filterParameters();
             }
         }
+
+        notifier = false;
 
         pros::delay(10); 
     }
@@ -34,6 +39,7 @@ void OpticsHandler::filterParameters(){
     int hue = opticalSensor.get_hue();
     double intakeVelocity = intake.get_actual_velocity();
     if (((colour == teamColour::red && hue >= 200 && hue <= 230) || (colour == teamColour::blue && (hue >= 350 || hue <= 20))) && !disable){
+        notifier = true;
         pros::delay(80);
         intake.move(0); // stop the intake
         pros::delay(STALL_TIME_MS); // stall for 250 ms

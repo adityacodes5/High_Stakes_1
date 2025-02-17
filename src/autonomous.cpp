@@ -2,6 +2,7 @@
 
 void blueLeft(){
     chassis.moveToPose(-2, -24, 30, 4000, {.forwards = false});
+    chassis.moveToPoint(-5, -27, 4000, {.forwards = false});
     chassis.waitUntilDone();
     pros::delay(500);
     clampPiston.toggle();   
@@ -13,10 +14,11 @@ void blueLeft(){
     chassis.turnToHeading(270, 2000);
     chassis.moveToPoint(-32, -32, 4000, {});
     chassis.waitUntilDone();
-    chassis.moveToPoint(-34, -32, 4000);
+    chassis.moveToPoint(-34, -32, 4000, {.maxSpeed = 50});
 }
 void redRight(){
     chassis.moveToPose(2, -24, 330, 4000, {.forwards = false});
+    chassis.moveToPoint(5, -27, 4000, {.forwards = false});
     chassis.waitUntilDone();
     pros::delay(500);
     clampPiston.toggle();   
@@ -28,7 +30,7 @@ void redRight(){
     chassis.turnToHeading(90, 2000);
     chassis.moveToPoint(32, -32, 4000, {});
     chassis.waitUntilDone();
-    chassis.moveToPoint(34, -32, 4000);
+    chassis.moveToPoint(34, -32, 4000, {.maxSpeed = 50});
 
 }
 void blueRight(){
