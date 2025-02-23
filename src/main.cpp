@@ -43,7 +43,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               10, // 10 inch track width
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               450, // drivetrain rpm is 360
-                              8 // horizontal drift is 2. If we had traction wheels, it would have been 8
+                              2 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
@@ -255,16 +255,16 @@ void newOmniAuto(){
     intakeHandler.disable = false;
     intake.move(128);
     chassis.turnToPoint(-24, -24.5, 600);
-    chassis.moveToPoint(-24, -24.5, 1250, {.maxSpeed = 70});
-    chassis.turnToPoint(-20, -34, 400);
-    chassis.moveToPoint(-20, -34, 500);
-    chassis.turnToPoint(22, -50, 600);
+    chassis.moveToPoint(-24, -24.5, 1500, {.maxSpeed = 70});
+    chassis.turnToPoint(-20, -34, 500);
+    chassis.moveToPoint(-20, -34, 700, {.maxSpeed = 70});
+    chassis.turnToPoint(22, -51, 700);
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     intake.move(128);
     armMotors.tare_position(); // Reset encoder position to 0
     armMotors.move_relative(-270, 100); // Move 320 degrees relative at 50 rpm
-    chassis.moveToPoint(22, -50, 1750, {.maxSpeed = 65});
+    chassis.moveToPoint(22, -51, 1750, {.maxSpeed = 65});
     chassis.moveToPoint(1.5, -48, 1250, {.forwards = false});
     chassis.turnToHeading(180, 700);
     conveyer.move(128);
@@ -289,6 +289,9 @@ void newOmniAuto(){
 
     conveyer.move(0);
     armHandler.moveArm(-1400, 1250, false);
+    chassis.turnToHeading(90, 150);
+    chassis.turnToHeading(270, 150);
+    chassis.turnToHeading(0, 150);
     roller.move(128);
     pros::delay(200);
     chassis.moveToPoint(1.5, -52, 1000, {.forwards = false});
@@ -298,15 +301,16 @@ void newOmniAuto(){
     armHandler.moveArm(2000, 1000, false);
 
     chassis.turnToHeading(270, 650);
-    chassis.moveToPoint(-60, -52, 3000, {.maxSpeed = 70});
+    chassis.moveToPoint(-60, -53, 3000, {.maxSpeed = 70});
     armHandler.moveArm(2000, 1000, false);
 
-    chassis.moveToPoint(-48, -52, 1000, {.forwards = false});
-    chassis.turnToHeading(180, 600);
-    chassis.moveToPoint(-48, -64, 800);
-    chassis.moveToPoint(-44, -54, 800, {.forwards = false});
-    chassis.turnToHeading(45, 800);
-    chassis.moveToPoint(-60, -62, 1000, {.forwards = false});
+    //chassis.moveToPoint(-48, -53, 1000, {.forwards = false});
+    //chassis.turnToHeading(180, 600);
+    chassis.moveToPoint(-46, -66, 1300);
+    //chassis.moveToPoint(-48, -62, 400, {.forwards = false});
+    //chassis.turnToHeading(45, 800);
+    //chassis.moveToPoint(-56, -58, 600, {.forwards = false});
+    chassis.moveToPoint(-70, -70, 1200, {.forwards = false});
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     intake.move(-128);
@@ -314,7 +318,7 @@ void newOmniAuto(){
     intake.move(0);
     clampPiston.toggle();
 
-    chassis.swingToHeading(30, DriveSide::LEFT, 600);
+    chassis.swingToHeading(30, DriveSide::LEFT, 800);
 
 
 
@@ -333,18 +337,18 @@ void newOmniAuto(){
     chassis.moveToPoint(-20, 34, 600);
     chassis.turnToPoint(23, 48, 600);
     chassis.moveToPoint(23, 48, 1750, {.maxSpeed = 70});
-    chassis.moveToPoint(3, 48, 1500, {.forwards = false});
-    chassis.turnToHeading(0, 650);
+    chassis.moveToPoint(5, 48, 1500, {.forwards = false});
+    chassis.turnToHeading(0, 800);
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     armMotors.tare_position(); // Reset encoder position to 0
     armMotors.move_relative(-330, 100); // Move 320 degrees relative at 50 rpm
-    chassis.moveToPoint(3, 60, 1250, {.minSpeed = 40});
+    chassis.moveToPoint(4, 60, 1250);
 
     chassis.waitUntilDone();
     pros::delay(1000);
     intake.move(0);
-    chassis.moveToPoint(3, 68, 1500, {.minSpeed = 40});
+    chassis.moveToPoint(4, 68, 1500);
     intake.move(128);
     pros::delay(150);
     intake.move(0);
@@ -356,7 +360,10 @@ void newOmniAuto(){
     pros::delay(200);
     intake.move(0);
     armHandler.moveArm(-1400, 1250, false);
-    chassis.moveToPoint(3, 50, 1000, {.forwards = false});
+    chassis.turnToHeading(90, 150);
+    chassis.turnToHeading(270, 150);
+    chassis.turnToHeading(180, 150);
+    chassis.moveToPoint(4, 50, 1000, {.forwards = false});
     chassis.waitUntil(5);
     intakeHandler.disable = false;
     intake.move(128);
@@ -365,12 +372,12 @@ void newOmniAuto(){
     chassis.turnToHeading(270, 650);
     chassis.moveToPoint(-60, 51, 1750, {.maxSpeed = 70});
 
-    chassis.moveToPoint(-48, 48, 800, {.forwards = false});
-    chassis.turnToHeading(0, 650);
+    //chassis.moveToPoint(-48, 48, 800, {.forwards = false});
+    //chassis.turnToHeading(0, 650);
     chassis.moveToPoint(-48, 64, 800);
-    chassis.moveToPoint(-44, 54, 750, {.forwards = false});
-    chassis.turnToHeading(135, 800);
-    chassis.moveToPoint(-62, 60, 1000, {.forwards = false});
+    //chassis.moveToPoint(-44, 54, 750, {.forwards = false});
+    //chassis.turnToHeading(135, 800);
+    chassis.moveToPoint(-70, 70, 1000, {.forwards = false});
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     intake.move(-128);
@@ -384,7 +391,7 @@ void newOmniAuto(){
     chassis.moveToPoint(6, 50, 1000, {.minSpeed = 80});
     chassis.turnToPoint(27, 20, 700);
     chassis.moveToPoint(27, 20, 2500, {.minSpeed = 70});
-    chassis.moveToPose(41, 2, 330, 1500, {.forwards = false, .maxSpeed = 60});
+    chassis.moveToPose(45, 2, 330, 1500, {.forwards = false, .maxSpeed = 60});
     chassis.moveToPoint(49, -2, 1000, {.forwards = false, .maxSpeed = 60});
     chassis.waitUntilDone();
     clampPiston.toggle();
@@ -397,19 +404,19 @@ void newOmniAuto(){
     chassis.moveToPoint(24, -51, 800);
     chassis.turnToPoint(60, -51, 600);
     chassis.moveToPoint(60, -51, 1500, {.maxSpeed = 60});
-    chassis.turnToHeading(0, 700);
-    chassis.moveToPoint(60, -64, 1500, {.forwards = false, .minSpeed = 40});
+    chassis.turnToHeading(45, 700);
+    chassis.moveToPoint(60, -68, 1500, {.forwards = false, .minSpeed = 50});
     chassis.waitUntilDone();
     intake.move(-128);
     pros::delay(200);
     intake.move(128);
     clampPiston.toggle();
-    chassis.moveToPoint(59, 0, 1200, {.minSpeed = 90});
-    chassis.moveToPoint(64, 60, 2000,  {.minSpeed = 75});
+    chassis.moveToPoint(60, 0, 1200, {.minSpeed = 90});
+    chassis.moveToPoint(70, 70, 2000,  {.minSpeed = 75});
     intake.move(0);
+    chassis.moveToPose(0, 0, 45, 2500, {.forwards = false,.maxSpeed = 75, .minSpeed = 60});
     armHandler.moveArm(-1400, 1250, false);
-    chassis.moveToPose(0, 0, 45, 2000, {.forwards = false,.maxSpeed = 75, .minSpeed = 60});
-    chassis.moveToPoint(60, 60, 500);
+    chassis.moveToPoint(60, 60, 500, {.maxSpeed = 40});
 
 }
 
@@ -538,7 +545,7 @@ void autonomous() {
 
     switch(selection){
         case 0:
-            goofyAhhBlueAllianceStake(); //TEMPORARY
+            newOmniAuto(); //TEMPORARY
             break;
         case 1:
             goofyAhhRedAllianceStake();

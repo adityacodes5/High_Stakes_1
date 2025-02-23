@@ -40,9 +40,8 @@ void OpticsHandler::filterParameters(){
     double intakeVelocity = intake.get_actual_velocity();
     if (((colour == teamColour::red && hue >= 200 && hue <= 230) || (colour == teamColour::blue && (hue >= 350 || hue <= 20))) && !disable){
         notifier = true;
-        pros::delay(80);
         intake.move(0); // stop the intake
-        pros::delay(STALL_TIME_MS); // stall for 250 ms
+        pros::delay(150); // stall for 250 ms
         intake.move(128); // resume intake
         pros::delay(250);
     }
