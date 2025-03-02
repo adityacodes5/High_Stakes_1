@@ -22,10 +22,11 @@ pros::adi::Pneumatics clampPiston = pros::adi::Pneumatics('A', false);
 pros::adi::Pneumatics doinkerPiston = pros::adi::Pneumatics('F', false);
 
 pros::Optical opticalSensor(18);
-pros::Imu imu(6);
+pros::Imu imu(5);
 
 pros::Rotation linearWheel = pros::Rotation(7);
 pros::Rotation angularWheel = pros::Rotation(-12);
+pros::Rotation armRotation = pros::Rotation(13);
 
 pros::MotorGroup roller({11}, pros::MotorGearset::green);
 pros::MotorGroup conveyer({19}, pros::MotorGearset::blue);
@@ -34,7 +35,7 @@ pros::adi::DigitalIn bumper = pros::adi::DigitalIn('H');
 
 
 OpticsHandler opticsHandler(opticalSensor, intake, roller, controller, currentColour);
-ArmHandler armHandler(controller, armMotors, 0.7, 10);
+ArmHandler armHandler(controller, armMotors, armRotation, 0.005, 10);
 IntakeHandler intakeHandler(conveyer);   
 
 
@@ -49,7 +50,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 // lateral motion controller
 lemlib::ControllerSettings linearController(10, // proportional gain (kP)
                                             0, // integral gain (kI)
-                                            3, // derivative gain (kD)
+                                            3.5, // derivative gain (kD)
                                             3, // anti windup
                                             1, // small error range, in inches
                                             100, // small error range timeout, in milliseconds
@@ -59,7 +60,7 @@ lemlib::ControllerSettings linearController(10, // proportional gain (kP)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(1.8, // proportional gain (kP)
+lemlib::ControllerSettings angularController(1.9, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              10, // derivative gain (kD)
                                              3, // anti windup
@@ -147,6 +148,7 @@ void initialize() {
             pros::lcd::print(4, "Auto: %s", autonNames[selection].c_str());
             pros::lcd::print(5, "Linear Calc: %f", calibrateTracker(linearWheel, startValueLinear));
             pros::lcd::print(6, "Angular Calc: %f", calibrateTracker(angularWheel, startValueAngular));
+            pros::lcd::print(7, "ArmCalc: %f", armRotation.get_position());
 
 
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
@@ -264,28 +266,26 @@ void newOmniAuto(){
     intake.move(128);
     armMotors.tare_position(); // Reset encoder position to 0
     armMotors.move_relative(-270, 100); // Move 320 degrees relative at 50 rpm
-    chassis.moveToPoint(22, -51, 1750, {.maxSpeed = 65});
-    chassis.moveToPoint(1.5, -48, 1250, {.forwards = false});
+    chassis.moveToPoint(22, -51, 1750, {.maxSpeed = 60});
+    chassis.moveToPoint(2, -48, 1250, {.forwards = false});
     chassis.turnToHeading(180, 700);
+    chassis.moveToPoint(2, -60, 800);
+    pros::delay(250);
     conveyer.move(128);
-    pros::delay(150);
+    pros::delay(100);
     conveyer.move(0);
-    pros::delay(150);
+    pros::delay(100);
     conveyer.move(128);
     pros::delay(150);
-    conveyer.move(0);
-    pros::delay(150);
-    conveyer.move(128);
-    pros::delay(200);
     conveyer.move(0);
     roller.move(0);
     conveyer.move(128);
-    chassis.moveToPoint(1.5, -68, 1200, {.minSpeed = 40});
-    chassis.waitUntilDone();
+    chassis.moveToPoint(2, -60, 800);
 
-    //chassis.moveToPoint(1, -68, 1250, {.minSpeed = 40});
+    chassis.moveToPoint(2, -68, 1250, {.minSpeed = 40});
     //pros::delay(300);
     //pros::delay(1000);
+    chassis.waitUntilDone();
 
     conveyer.move(0);
     armHandler.moveArm(-1400, 1250, false);
@@ -294,7 +294,7 @@ void newOmniAuto(){
     chassis.turnToHeading(0, 150);
     roller.move(128);
     pros::delay(200);
-    chassis.moveToPoint(1.5, -52, 1000, {.forwards = false});
+    chassis.moveToPoint(2, -52, 1000, {.forwards = false});
     chassis.waitUntil(5);
     intakeHandler.disable = false;
     intake.move(128);
@@ -306,11 +306,11 @@ void newOmniAuto(){
 
     //chassis.moveToPoint(-48, -53, 1000, {.forwards = false});
     //chassis.turnToHeading(180, 600);
-    chassis.moveToPoint(-46, -66, 1300);
+    chassis.moveToPoint(-45, -66, 1300);
     //chassis.moveToPoint(-48, -62, 400, {.forwards = false});
     //chassis.turnToHeading(45, 800);
     //chassis.moveToPoint(-56, -58, 600, {.forwards = false});
-    chassis.moveToPoint(-70, -70, 1200, {.forwards = false});
+    chassis.moveToPoint(-65, -70, 1200, {.forwards = false});
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     intake.move(-128);
@@ -323,9 +323,9 @@ void newOmniAuto(){
 
 
 
-    chassis.moveToPoint(-50, 0, 1750, {.maxSpeed = 85});
+    chassis.moveToPoint(-48, -4, 1750, {.maxSpeed = 85});
     chassis.turnToHeading(180, 800);
-    chassis.moveToPoint(-50, 30, 1750, {.forwards = false, .maxSpeed = 70});
+    chassis.moveToPoint(-48, 30, 1750, {.forwards = false, .maxSpeed = 70});
 
     chassis.waitUntil(26);
     clampPiston.toggle();
@@ -335,20 +335,20 @@ void newOmniAuto(){
     chassis.moveToPoint(-24, 24.5, 1250, {.maxSpeed = 70});
     chassis.turnToPoint(-20, 34, 500);
     chassis.moveToPoint(-20, 34, 600);
-    chassis.turnToPoint(23, 48, 600);
-    chassis.moveToPoint(23, 48, 1750, {.maxSpeed = 70});
+    chassis.turnToPoint(25, 47, 600);
+    chassis.moveToPoint(25, 47, 1750, {.maxSpeed = 65});
     chassis.moveToPoint(5, 48, 1500, {.forwards = false});
-    chassis.turnToHeading(0, 800);
+    chassis.turnToHeading(0, 1000);
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     armMotors.tare_position(); // Reset encoder position to 0
     armMotors.move_relative(-330, 100); // Move 320 degrees relative at 50 rpm
-    chassis.moveToPoint(4, 60, 1250);
+    chassis.moveToPoint(5, 60, 1250);
 
     chassis.waitUntilDone();
     pros::delay(1000);
     intake.move(0);
-    chassis.moveToPoint(4, 68, 1500);
+    chassis.moveToPoint(5, 68, 1500);
     intake.move(128);
     pros::delay(150);
     intake.move(0);
@@ -363,21 +363,22 @@ void newOmniAuto(){
     chassis.turnToHeading(90, 150);
     chassis.turnToHeading(270, 150);
     chassis.turnToHeading(180, 150);
-    chassis.moveToPoint(4, 50, 1000, {.forwards = false});
+    chassis.moveToPoint(5, 50, 1000, {.forwards = false});
     chassis.waitUntil(5);
     intakeHandler.disable = false;
     intake.move(128);
     armHandler.moveArm(2000, 1000, false);
 
     chassis.turnToHeading(270, 650);
-    chassis.moveToPoint(-60, 51, 1750, {.maxSpeed = 70});
+    chassis.moveToPoint(-60, 52, 2000, {.maxSpeed = 70});
 
     //chassis.moveToPoint(-48, 48, 800, {.forwards = false});
     //chassis.turnToHeading(0, 650);
-    chassis.moveToPoint(-48, 64, 800);
+    chassis.moveToPoint(-48, 62, 1000);
     //chassis.moveToPoint(-44, 54, 750, {.forwards = false});
     //chassis.turnToHeading(135, 800);
-    chassis.moveToPoint(-70, 70, 1000, {.forwards = false});
+    chassis.turnToHeading(chassis.getPose().theta + 90, 800);
+    chassis.moveToPoint(-65, 70, 1000, {.forwards = false});
     chassis.waitUntilDone();
     intakeHandler.disable = true;
     intake.move(-128);
@@ -385,34 +386,36 @@ void newOmniAuto(){
     intake.move(0);
     clampPiston.toggle();
 
-    gameInit(teamColour::red);
-    intakeHandler.disable = false;
     roller.move(128);
     chassis.moveToPoint(6, 50, 1000, {.minSpeed = 80});
     chassis.turnToPoint(27, 20, 700);
     chassis.moveToPoint(27, 20, 2500, {.minSpeed = 70});
-    chassis.moveToPose(45, 2, 330, 1500, {.forwards = false, .maxSpeed = 60});
-    chassis.moveToPoint(49, -2, 1000, {.forwards = false, .maxSpeed = 60});
+    chassis.moveToPose(44, 2, 330, 1500, {.forwards = false, .maxSpeed = 60});
+    chassis.moveToPoint(50, -2, 1000, {.forwards = false, .maxSpeed = 60});
     chassis.waitUntilDone();
+    gameInit(teamColour::red);
+    intakeHandler.disable = false;
     clampPiston.toggle();
     roller.move(0);
     intake.move(128);
     
-    chassis.turnToPoint(22, -27, 600);
-    chassis.moveToPoint(22, -27, 1300, {.maxSpeed = 60});
-    chassis.turnToPoint(24, -51, 600);
-    chassis.moveToPoint(24, -51, 800);
-    chassis.turnToPoint(60, -51, 600);
-    chassis.moveToPoint(60, -51, 1500, {.maxSpeed = 60});
-    chassis.turnToHeading(45, 700);
+    chassis.turnToPoint(22, -29, 600);
+    chassis.moveToPoint(22, -29, 1300, {.maxSpeed = 60});
+    chassis.turnToPoint(24, -52, 600);
+    chassis.moveToPoint(24, -52, 800);
+    chassis.turnToPoint(60, -52, 600);
+    chassis.moveToPoint(60, -52, 1500, {.maxSpeed = 60});
+    //chassis.swingToHeading(45, DriveSide::LEFT, 1000);
+    chassis.moveToPoint(60, -47, 800, {.forwards = false, .minSpeed = 50});
     chassis.moveToPoint(60, -68, 1500, {.forwards = false, .minSpeed = 50});
     chassis.waitUntilDone();
     intake.move(-128);
     pros::delay(200);
     intake.move(128);
     clampPiston.toggle();
-    chassis.moveToPoint(60, 0, 1200, {.minSpeed = 90});
-    chassis.moveToPoint(70, 70, 2000,  {.minSpeed = 75});
+    chassis.moveToPoint(58, 0, 1200, {.minSpeed = 90});
+    chassis.turnToPoint(75, 70, 600);
+    chassis.moveToPoint(75, 70, 2000,  {.minSpeed = 75});
     intake.move(0);
     chassis.moveToPose(0, 0, 45, 2500, {.forwards = false,.maxSpeed = 75, .minSpeed = 60});
     armHandler.moveArm(-1400, 1250, false);
@@ -501,8 +504,8 @@ void goofyAhhRedAllianceStake(){
     chassis.waitUntilDone();
     pros::delay(500);
 
-    //chassis.moveToPoint(-28, -30, 5000, {.maxSpeed = 60}); // GAME: TOUCH WALL
-    chassis.moveToPoint(-60, -10, 5000, {.maxSpeed = 80}); // ELIMS
+    chassis.moveToPoint(-28, -30, 5000, {.maxSpeed = 60}); // GAME: TOUCH WALL
+    //chassis.moveToPoint(-60, -10, 5000, {.maxSpeed = 80}); // ELIMS
 
 }
 
@@ -535,8 +538,258 @@ void goofyAhhBlueAllianceStake(){
     chassis.waitUntilDone();
     pros::delay(500);
 
-    //chassis.moveToPoint(28, -30, 5000, {.maxSpeed = 60}); //GAME
-    chassis.moveToPoint(60, -10, 5000, {.maxSpeed = 80}); //ELIMS
+    chassis.moveToPoint(28, -30, 5000, {.maxSpeed = 60}); //GAME
+    //chassis.moveToPoint(60, -10, 5000, {.maxSpeed = 80}); //ELIMS
+}
+
+void newProvsAuto(){
+    pros::Task armTask = pros::Task(armHandlerFunction);
+    chassis.setPose(-63.5, 0, 90);
+    intakeHandler.disable = true;
+    intake.move(128);
+    pros::delay(500);
+    intake.move(0);
+    chassis.moveToPoint(-49, 0, 750);
+    chassis.turnToHeading(0, 650);
+    chassis.moveToPoint(-49, -28, 1750, {.forwards = false, .maxSpeed = 70});
+
+    chassis.waitUntil(26);
+    clampPiston.toggle();
+    intakeHandler.disable = false;
+    intake.move(128);
+
+    //ring 1
+    chassis.turnToPoint(-24, -24.5, 600);
+    chassis.moveToPoint(-24, -24.5, 1500, {.maxSpeed = 70});
+
+    //ring 2
+    chassis.turnToPoint(-24, -51, 600);
+    chassis.moveToPoint(-24, -51, 1500, {.maxSpeed = 70});
+
+    //ring 3 + 4
+    chassis.turnToPoint(-64, -51, 600);
+    chassis.moveToPoint(-64, -51, 2500, {.maxSpeed = 70});
+    chassis.turnToPoint(-53, -61, 600);
+    chassis.moveToPoint(-53, -61, 1500, {.maxSpeed = 70});
+    chassis.moveToPoint(-65, -67, 1250, {.forwards = false});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(-128);
+    pros::delay(150);
+    intake.move(0);
+
+    //wall stake 1
+    chassis.moveToPoint(-24, -50, 1000);
+    chassis.moveToPoint(2, -50, 1500);
+    chassis.turnToHeading(180, 700);
+
+    chassis.waitUntilDone();
+    intakeHandler.disable = true;
+    intake.move(128);
+    armMotors.tare_position(); // Reset encoder position to 0
+    armHandler.moveArm(-270, 1000, true); // Move 320 degrees relative at 50 rpm
+    //chassis.moveToPoint(2, -60, 800);
+    chassis.moveToPoint(2, -74, 2500, {.minSpeed = 40});
+    pros::delay(1600);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+
+
+    conveyer.move(0);
+    armHandler.moveArm(-1500, 1250, false);
+    chassis.turnToHeading(90, 150);
+    chassis.turnToHeading(270, 150);
+    chassis.turnToHeading(0, 150);
+    roller.move(128);
+    pros::delay(200);
+
+    chassis.moveToPoint(2, -56, 1000, {.forwards = false});
+    chassis.waitUntil(5);
+    intakeHandler.disable = true;
+    armHandler.moveArm(2000, 1000, false);
+    intake.move(0);
+
+    //blue stake
+    chassis.turnToHeading(250, 700);
+    chassis.moveToPoint(62, -26, 2000, {.forwards = false, .maxSpeed = 80});
+    clampPiston.toggle();
+    chassis.moveToPoint(67, -67, 1700, {.forwards = false});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    chassis.moveToPoint(62, -40, 1500);
+    roller.move(128);
+    chassis.moveToPoint(25, -29, 1500, {.maxSpeed = 70});
+    chassis.turnToHeading(225, 800);
+    chassis.moveToPoint(51, -6, 1500, {.forwards = false, .maxSpeed = 60});
+    chassis.moveToPoint(55, -2, 600, {.forwards = false});
+    pros::delay(50);
+    clampPiston.toggle();
+    roller.move(0);
+    intake.move(128);
+    intakeHandler.disable = false;
+    gameInit(teamColour::red);
+    chassis.turnToPoint(25, 22, 600);
+    chassis.moveToPoint(25, 22, 1200, {.maxSpeed = 70});
+    chassis.turnToPoint(25, 46, 600);
+    chassis.moveToPoint(25, 46, 1250, {.maxSpeed = 70});
+    chassis.turnToHeading(90, 700);
+    chassis.moveToPoint(50, 45, 1500, {.maxSpeed = 60});
+    chassis.turnToHeading(0, 700);
+    chassis.moveToPoint(50, 65, 1500, {.maxSpeed = 60});
+    chassis.moveToPoint(70, 70, 1500, {.forwards = false});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(-128);
+    pros::delay(100);
+    intake.move(0);
+
+    gameInit(teamColour::neutral);
+    //wall stake 2
+    intakeHandler.disable = true;
+    chassis.moveToPoint(-1, 48, 1750);
+    chassis.waitUntilDone();
+    intake.move(128);
+    chassis.turnToHeading(0, 800);
+    armMotors.tare_position(); // Reset encoder position to 0
+    chassis.waitUntilDone();
+    chassis.moveToPoint(-1, 62, 1000);
+    armHandler.moveArm(-270, 1000, true); // Move 320 degrees relative at 50 rpm
+    chassis.waitUntilDone();
+    pros::delay(250);
+    chassis.moveToPoint(-1, 72, 2500);
+    pros::delay(1000);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    armHandler.moveArm(-1400, 1250, false);
+    chassis.turnToHeading(90, 150);
+    chassis.turnToHeading(270, 150);
+    chassis.turnToHeading(180, 150);
+    chassis.moveToPoint(-1, 55, 1000, {.forwards = false});
+    chassis.waitUntil(5);
+    intakeHandler.disable = false;
+    intake.move(0);
+    roller.move(128);
+
+
+    chassis.turnToPoint(-27, 24.5, 600);
+    armHandler.moveArm(2000, 1000, false);
+    chassis.moveToPoint(-27, 24.5, 1500, {.maxSpeed = 70});
+    chassis.turnToHeading(90, 700);
+    chassis.moveToPoint(-56, 24.5, 2500, {.forwards = false, .maxSpeed = 70});
+    chassis.waitUntil(30);
+    clampPiston.toggle();
+    roller.move(0);
+    intake.move(128);
+    chassis.moveToPoint(-23, 46.5, 1500, {.maxSpeed = 70});
+    chassis.turnToHeading(270, 700);
+    chassis.moveToPoint(-64, 46.5, 2500, {.maxSpeed = 50});
+    chassis.turnToPoint(-55, 60, 600);
+    chassis.moveToPoint(-55, 60, 1500, {.maxSpeed = 70});
+    chassis.moveToPoint(-70, 70, 1500, {.forwards = false});
+    chassis.waitUntilDone();
+    clampPiston.toggle();
+    intake.move(-128);
+    pros::delay(100);
+    intake.move(0);
+    chassis.moveToPoint(-40, 40, 700, {.minSpeed = 70});
+    chassis.turnToHeading(330, 600);
+    chassis.moveToPoint(0, 0, 2500, {.forwards = false, .maxSpeed = 55});
+    armHandler.moveArm(-1000, 1000, false);
+    chassis.moveToPoint(-70, -70, 1000, {.maxSpeed = 50});
+    armHandler.moveArm(2000, 1000, false);
+
+
+
+
+
+
+
+}
+
+void provs4plusRed(){
+    intake.move(0);
+    chassis.moveToPose(-2, -24, 30, 1250, {.forwards = false});
+    chassis.moveToPoint(-5, -27, 600, {.forwards = false});
+    chassis.waitUntilDone();
+    clampPiston.toggle();  
+    gameInit(teamColour::red);
+    intake.move(128);
+    chassis.turnToPoint(9.5, -45.5, 1000);
+    chassis.moveToPoint(9.5, -45.5, 1500, {.maxSpeed = 60});
+    chassis.turnToPoint(20, -48, 600);
+    chassis.moveToPoint(18, -48, 700, {.maxSpeed = 60});
+    chassis.turnToHeading(90, 750);
+    chassis.moveToPoint(26, -48, 1500, {.maxSpeed = 60});
+    chassis.moveToPoint(17, -44, 1000, {.forwards = false, .minSpeed = 80});  
+    chassis.waitUntilDone();
+    intake.move(0);
+    chassis.turnToPoint(-22, -48, 700);
+    chassis.moveToPoint(-17, -40, 1500);
+    doinkerPiston.extend();
+    chassis.moveToPoint(17, -44, 1000);
+    chassis.turnToPoint(22, -28, 600);
+    chassis.waitUntilDone();
+    doinkerPiston.retract(); //retract doinker piston
+    intake.move(128);
+    chassis.moveToPoint(22, -28, 1500, {.maxSpeed = 60});
+    chassis.waitUntilDone();
+    pros::delay(500);
+
+    chassis.moveToPoint(-28, -30, 5000, {.maxSpeed = 60});
+
+}
+
+void wallStakeTest(){
+    armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    intakeHandler.disable = true;
+    intake.move(128);
+    armHandler.moveArm(-280, 1000, true); // Move 320 degrees relative at 50 rpm
+    armMotors.brake();
+    chassis.moveToPoint(0, 15, 1000);
+    chassis.waitUntilDone();
+    pros::delay(250);
+    chassis.moveToPoint(0, 35, 2500);
+    pros::delay(700);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    pros::delay(80);
+    intake.move(128);
+    pros::delay(80);
+    intake.move(0);
+    armHandler.moveArm(-1400, 1250, false);
+    chassis.turnToHeading(90, 150);
+    chassis.turnToHeading(270, 150);
+    chassis.turnToHeading(180, 150);
+    chassis.moveToPoint(0, 0, 1000, {.forwards = false});
 }
 
 
@@ -545,7 +798,7 @@ void autonomous() {
 
     switch(selection){
         case 0:
-            newOmniAuto(); //TEMPORARY
+            goofyAhhBlueAllianceStake(); //TEMPORARY
             break;
         case 1:
             goofyAhhRedAllianceStake();
@@ -565,7 +818,7 @@ void autonomous() {
             redRight();
             break;
         case 6:
-            newOmniAuto();
+            newProvsAuto();
             break;
     }
 
@@ -592,6 +845,7 @@ void opcontrol() {
 
         controller.get_digital_new_press(DIGITAL_Y) ? clampPiston.toggle() : 0; 
         controller.get_digital_new_press(DIGITAL_A) ? doinkerPiston.toggle() : 0;
+
         
         pros::delay(10);
 

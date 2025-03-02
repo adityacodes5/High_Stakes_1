@@ -7,6 +7,7 @@ class ArmHandler {
     private:
         pros::Controller &controller;
         pros::MotorGroup &armMotors;
+        pros::Rotation &armRotation;
         double kP;
         double settleError;
 
@@ -19,6 +20,8 @@ class ArmHandler {
         double settleTime = 250;
         double timeout = 0;
 
+        double initialPosition;
+
         bool startedMoving = false;
     
         bool isBraked = false;
@@ -26,7 +29,7 @@ class ArmHandler {
         const int HARD_STOP_POSITION = -5000;
     public:
 
-        ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors, double kP, double settleError);
+        ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors, pros::Rotation &armRotation, double kP, double settleError);
     
         void update();
         double compute(double targetPosition);

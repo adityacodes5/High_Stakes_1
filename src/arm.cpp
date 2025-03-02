@@ -1,8 +1,9 @@
 #include "main.h"
 
-ArmHandler::ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors, double kP, double settleError) :
+ArmHandler::ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors, pros::Rotation &armRotation,  double kP, double settleError) :
     controller(controller),
     armMotors(armMotors),
+    armRotation(armRotation),
     kP(kP),
     settleError(settleError)
 {}
@@ -10,6 +11,8 @@ ArmHandler::ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors
 bool armUp = false;
 
 void ArmHandler::update() {
+    armRotation.set_position(0);
+    initialPosition = armRotation.get_position();
     while (true) {
         int armY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
@@ -22,7 +25,9 @@ void ArmHandler::update() {
             // Reset the motor's position to 0 and move 320 degrees relative to the new zero
             armMotors.tare_position(); // Reset encoder position to 0
             //armMotors.move_relative(-355, 70); // Move 320 degrees relative at 50 rpm
-            armMotors.move_relative(-300, 80);
+            //armMotors.move_relative(-300, 80);
+            moveArm(-260, 1000, true);
+
             isMovingToPosition = true;
             isBraked = false;
         } else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
@@ -97,9 +102,11 @@ void ArmHandler::moveArm(double targetPos, double timeout, bool relative){
 
     this->timeout = timeout;
     int loopTime = 10;  // Each loop runs every 10ms
+    targetPos = 38.3*targetPos;
+    targetPos = targetPos + initialPosition;
 
     while (!isSettled() || !startedMoving) {
-        double error = targetPos - armMotors.get_position();
+        double error = targetPos - armRotation.get_position();
         double output = compute(error);
         armMotors.move(output);
 
