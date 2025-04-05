@@ -26,7 +26,7 @@ pros::Imu imu(5);
 
 pros::Rotation linearWheel = pros::Rotation(7);
 pros::Rotation angularWheel = pros::Rotation(-12);
-pros::Rotation armRotation = pros::Rotation(13);
+pros::Rotation armRotation = pros::Rotation(-14);
 
 pros::MotorGroup roller({11}, pros::MotorGearset::green);
 pros::MotorGroup conveyer({19}, pros::MotorGearset::blue);
@@ -433,19 +433,27 @@ void newSigRedLeft4Ring(){
     clampPiston.toggle();  
     gameInit(teamColour::red);
     intake.move(128);
-    chassis.turnToPoint(9.5, -45.5, 1000);
-    chassis.moveToPoint(9.5, -45.5, 1500, {.maxSpeed = 60});
-    chassis.turnToPoint(20, -48, 600);
-    chassis.moveToPoint(18, -48, 700, {.maxSpeed = 60});
-    chassis.turnToHeading(90, 750);
-    chassis.moveToPoint(26, -48, 1500, {.maxSpeed = 60});
+    chassis.turnToPoint(9.5, -46.5, 700);
+    chassis.moveToPoint(9.5, -46.5, 900, {.maxSpeed = 60});
+    chassis.turnToPoint(20, -49, 400);
+    chassis.moveToPoint(18, -49, 700, {.maxSpeed = 60});
+    chassis.turnToHeading(90, 400);
+    chassis.moveToPoint(35, -49, 1250, {.maxSpeed = 60});
     chassis.moveToPoint(17, -44, 1000, {.forwards = false, .minSpeed = 80});  
     chassis.turnToPoint(22, -28, 600);
-    chassis.moveToPoint(22, -28, 1500, {.maxSpeed = 60});
+    chassis.moveToPoint(22, -28, 1000, {.maxSpeed = 60});
     chassis.waitUntilDone();
-    pros::delay(500);
 
-    chassis.moveToPoint(-28, -30, 5000, {.maxSpeed = 60});
+    chassis.moveToPoint(10, -13, 1000);
+    chassis.turnToPoint(-60, -13, 600);
+    chassis.waitUntilDone();
+    intake.move(0);
+    chassis.moveToPoint(-60, -13, 1800, {.maxSpeed = 55});
+    chassis.waitUntilDone();
+    doinkerPiston.toggle();
+    chassis.moveToPose(-104, 16, 300, 2000);
+    chassis.turnToHeading(30, 1000);
+
 
 
 }
@@ -459,19 +467,28 @@ void newSigBlueRight4Ring(){
     clampPiston.toggle();  
     gameInit(teamColour::blue);
     intake.move(128);
-    chassis.turnToPoint(-9.5, -45.5, 1000);
-    chassis.moveToPoint(-9.5, -45.5, 1500, {.maxSpeed = 60});
-    chassis.turnToPoint(-20, -48, 600);
+    chassis.turnToPoint(-9.5, -46, 700);
+    chassis.moveToPoint(-9.5, -46, 900, {.maxSpeed = 60});
+    chassis.turnToPoint(-20, -48, 400);
     chassis.moveToPoint(-18, -48, 700, {.maxSpeed = 60});
-    chassis.turnToHeading(270, 750);
-    chassis.moveToPoint(-29, -48, 1500, {.maxSpeed = 60});
+    chassis.turnToHeading(270, 400);
+    chassis.moveToPoint(-35, -48, 1250, {.maxSpeed = 60});
     chassis.moveToPoint(-17, -44, 1000, {.forwards = false, .minSpeed = 80});  
     chassis.turnToPoint(-22, -28, 600);
-    chassis.moveToPoint(-22, -28, 1500, {.maxSpeed = 60});
+    chassis.moveToPoint(-22, -28, 1000, {.maxSpeed = 60});
     chassis.waitUntilDone();
-    pros::delay(500);
+   // pros::delay(500);
 
-    chassis.moveToPoint(30, -30, 5000, {.maxSpeed = 50});
+   chassis.moveToPoint(-10, -13, 1000);
+   chassis.turnToPoint(60, -13, 600);
+   chassis.waitUntilDone();
+   intake.move(0);
+   chassis.moveToPoint(60, -13, 1800, {.maxSpeed = 55});
+   chassis.waitUntilDone();
+   doinkerPiston.toggle();
+   chassis.moveToPose(104, 16, 60, 2000);
+   chassis.turnToHeading(135, 1000);
+
 
 }
 
@@ -798,7 +815,7 @@ void autonomous() {
 
     switch(selection){
         case 0:
-            goofyAhhBlueAllianceStake(); //TEMPORARY
+            newSigRedLeft4Ring(); //TEMPORARY
             break;
         case 1:
             goofyAhhRedAllianceStake();

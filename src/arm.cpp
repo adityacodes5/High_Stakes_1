@@ -9,7 +9,6 @@ ArmHandler::ArmHandler(pros::Controller& controller, pros::MotorGroup& armMotors
 {}
 
 bool armUp = false;
-
 void ArmHandler::update() {
     armRotation.set_position(0);
     initialPosition = armRotation.get_position();
@@ -19,6 +18,7 @@ void ArmHandler::update() {
         if (fabs(armY) > 5) {
             // Allow free movement based on joystick input
             armMotors.move(armY);
+            armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
             isBraked = false; 
             isMovingToPosition = false;
         } else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
@@ -26,15 +26,11 @@ void ArmHandler::update() {
             armMotors.tare_position(); // Reset encoder position to 0
             //armMotors.move_relative(-355, 70); // Move 320 degrees relative at 50 rpm
             //armMotors.move_relative(-300, 80);
-            moveArm(-260, 1000, true);
+            moveArm(-155, 1000, true);
 
             isMovingToPosition = true;
             isBraked = false;
-        } else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-            // Set brake mode to coast when button L1 is pressed
             armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-            isBraked = false;
-            isMovingToPosition = false;
         } else if (fabs(armY) <= 5 && !isBraked && !isMovingToPosition) {
             // Engage brake hold when arm is idle
             armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
