@@ -26,11 +26,11 @@ void ArmHandler::update() {
             armMotors.tare_position(); // Reset encoder position to 0
             //armMotors.move_relative(-355, 70); // Move 320 degrees relative at 50 rpm
             //armMotors.move_relative(-300, 80);
-            moveArm(-155, 1000, true);
+            moveArm(-170, 1000, true);
 
             isMovingToPosition = true;
             isBraked = false;
-            armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+            //armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         } else if (fabs(armY) <= 5 && !isBraked && !isMovingToPosition) {
             // Engage brake hold when arm is idle
             armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);

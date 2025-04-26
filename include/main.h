@@ -49,10 +49,12 @@ enum gameMode{
 
 #include "api.h"
 #include "lemlib/api.hpp"
+#include "newchassis.hpp"
 #include "optical.h"
 #include "custom.h"
 #include "autonomous.h"
 #include "arm.h"
+
 
 /**
  * You should add more #includes here

@@ -19,7 +19,9 @@ pros::MotorGroup armMotors({20}, pros::MotorGearset::green);
 pros::MotorGroup intake({11, 19}, pros::MotorGearset::blue);
 
 pros::adi::Pneumatics clampPiston = pros::adi::Pneumatics('A', false);
-pros::adi::Pneumatics doinkerPiston = pros::adi::Pneumatics('F', false);
+pros::adi::Pneumatics leftDoinkerPiston = pros::adi::Pneumatics('F', false);
+pros::adi::Pneumatics rightDoinkerPiston = pros::adi::Pneumatics('E', false);
+pros::adi::Pneumatics intakeRamp = pros::adi::Pneumatics('G', false);
 
 pros::Optical opticalSensor(18);
 pros::Imu imu(5);
@@ -35,7 +37,7 @@ pros::adi::DigitalIn bumper = pros::adi::DigitalIn('H');
 
 
 OpticsHandler opticsHandler(opticalSensor, intake, roller, controller, currentColour);
-ArmHandler armHandler(controller, armMotors, armRotation, 0.005, 10);
+ArmHandler armHandler(controller, armMotors, armRotation, 0.007, 10);
 IntakeHandler intakeHandler(conveyer);   
 
 
@@ -71,7 +73,7 @@ lemlib::ControllerSettings angularController(1.9, // proportional gain (kP)
                                              0 // maximum acceleration (slew)
 );
 
-lemlib::TrackingWheel veritical_tracking_wheel(&linearWheel, lemlib::Omniwheel::NEW_2, 0.6);
+lemlib::TrackingWheel veritical_tracking_wheel(&linearWheel, lemlib::Omniwheel::NEW_2, 0.9);
 lemlib::TrackingWheel horizontal_tracking_wheel(&angularWheel, lemlib::Omniwheel::NEW_2, -2.7);
 // sensors for odometry
 lemlib::OdomSensors sensors(&veritical_tracking_wheel,
@@ -87,10 +89,15 @@ lemlib::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
                                      1.019 // expo curve gain
 );
 
-// input curve for steer input during driver control
+//// input curve for steer input during driver control
+//lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
+//                                  10, // minimum output where drivetrain will move out of 127
+//                                  1.019 // expo curve gain
+//);
+
 lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
-                                  10, // minimum output where drivetrain will move out of 127
-                                  1.019 // expo curve gain
+                                  8, // minimum output where drivetrain will move out of 127
+                                  1.03// expo curve gain
 );
 
 // create the chassis
@@ -425,6 +432,9 @@ void newOmniAuto(){
 
 
 void newSigRedLeft4Ring(){
+
+    armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    armMotors.brake();
     
     intake.move(0);
     chassis.moveToPose(-2, -24, 30, 1250, {.forwards = false});
@@ -450,7 +460,7 @@ void newSigRedLeft4Ring(){
     intake.move(0);
     chassis.moveToPoint(-60, -13, 1800, {.maxSpeed = 55});
     chassis.waitUntilDone();
-    doinkerPiston.toggle();
+    leftDoinkerPiston.toggle();
     chassis.moveToPose(-104, 16, 300, 2000);
     chassis.turnToHeading(30, 1000);
 
@@ -459,6 +469,10 @@ void newSigRedLeft4Ring(){
 }
 
 void newSigBlueRight4Ring(){
+
+    
+    armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    armMotors.brake();
         
     intake.move(0);
     chassis.moveToPose(2, -24, 330, 1250, {.forwards = false});
@@ -483,9 +497,9 @@ void newSigBlueRight4Ring(){
    chassis.turnToPoint(60, -13, 600);
    chassis.waitUntilDone();
    intake.move(0);
-   chassis.moveToPoint(60, -13, 1800, {.maxSpeed = 55});
+   chassis.moveToPoint(60, -13, 1800, {.maxSpeed = 70});
    chassis.waitUntilDone();
-   doinkerPiston.toggle();
+   leftDoinkerPiston.toggle();
    chassis.moveToPose(104, 16, 60, 2000);
    chassis.turnToHeading(135, 1000);
 
@@ -764,11 +778,11 @@ void provs4plusRed(){
     intake.move(0);
     chassis.turnToPoint(-22, -48, 700);
     chassis.moveToPoint(-17, -40, 1500);
-    doinkerPiston.extend();
+    leftDoinkerPiston.extend();
     chassis.moveToPoint(17, -44, 1000);
     chassis.turnToPoint(22, -28, 600);
     chassis.waitUntilDone();
-    doinkerPiston.retract(); //retract doinker piston
+    leftDoinkerPiston.retract(); //retract doinker piston
     intake.move(128);
     chassis.moveToPoint(22, -28, 1500, {.maxSpeed = 60});
     chassis.waitUntilDone();
@@ -809,13 +823,100 @@ void wallStakeTest(){
     chassis.moveToPoint(0, 0, 1000, {.forwards = false});
 }
 
+void worldsRedNegSafe(){
+    gameInit(teamColour::red);
+    chassis.setPose(-17, 13, 300);
+    armHandler.moveArm(-1500, 1000, true);
+    chassis.moveToPoint(-3, 3, 700, {.forwards = false});
+
+    armHandler.moveArm(2000, 750, true);
+
+    intake.move(0);
+    chassis.moveToPoint(-2, -24, 1250, {.forwards = false});
+    chassis.moveToPoint(-5, -27, 600, {.forwards = false});
+    clampPiston.toggle();  
+    gameInit(teamColour::red);
+    intake.move(128);
+    chassis.turnToPoint(9.5, -42, 1000);
+    chassis.moveToPoint(9.5, -42, 1500, {.maxSpeed = 60});
+    chassis.turnToPoint(20, -45.5, 500);
+    chassis.moveToPoint(18, -45.5, 700, {.maxSpeed = 60});
+    chassis.turnToHeading(90, 750);
+    chassis.moveToPoint(26, -45.5, 1500, {.maxSpeed = 60});
+    chassis.moveToPoint(17, -42, 1000, {.forwards = false, .minSpeed = 80});  
+    chassis.turnToPoint(22, -26.5, 600);
+    chassis.moveToPoint(22, -26.5, 1500, {.maxSpeed = 60});
+    chassis.waitUntilDone();
+    pros::delay(500);
+
+    chassis.moveToPoint(-28, -30, 5000, {.maxSpeed = 60}); // GAME: TOUCH WALL
+
+
+
+}
+
+void worldsBluePosUnderLadder(){ //Alliance Stake. Middle ring, under ladder rings
+    gameInit(teamColour::blue);
+    chassis.setPose(0, 0, 120);
+    armHandler.moveArm(-2000, 1000, true);
+    chassis.moveToPoint(-7, 10, 800, {.forwards = false});
+    //moveLinear(chassis, -5, 1000, {.forwards = false});
+    chassis.turnToPoint(6, 10, 500);
+    chassis.waitUntilDone();
+    intakeRamp.extend();
+    roller.move(128);
+    chassis.moveToPoint(6, 10, 1500, {.maxSpeed = 60});
+    pros::Task t1([&](){
+        armHandler.moveArm(2500, 2000, true);
+        armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        armMotors.brake();
+    });
+    chassis.waitUntil(12);
+    intakeRamp.retract();
+    pros::delay(200);
+    chassis.turnToHeading(150, 500);
+    chassis.waitUntilDone();
+    roller.move(0);
+    chassis.moveToPoint(-9, 40, 2000, {.forwards = false, .maxSpeed = 60});
+    chassis.waitUntil(31);
+    clampPiston.extend();
+    pros::delay(100);
+
+    chassis.turnToPoint(6, 53, 500);
+    chassis.waitUntilDone();
+    intake.move(0);
+    chassis.moveToPoint(6, 53, 1200, {.maxSpeed = 60});
+    chassis.waitUntilDone();
+    leftDoinkerPiston.extend();
+    pros::delay(300);
+    chassis.turnToHeading(25, 350);
+    moveLinear(chassis, -39, 1000);
+    chassis.turnToPoint(-14, 33, 500);
+    chassis.waitUntilDone();
+    intake.move(128);
+    chassis.waitUntilDone();
+    leftDoinkerPiston.retract();
+    //chassis.moveToPoint(-14, 33, 800, {.maxSpeed = 60});
+    chassis.moveToPoint(-30, 37, 2000, {.maxSpeed = 60});
+
+
+
+
+}
+
+
+void test(){
+    moveLinear(chassis, 20, 1000);
+}
+
 
 void autonomous() {
     pros::Task intakeStallTask =  pros::Task(recoverIntake); 
 
     switch(selection){
         case 0:
-            newSigRedLeft4Ring(); //TEMPORARY
+            worldsBluePosUnderLadder(); //TEMPORARY
+            //moveLinear(chassis, -20, 1000);
             break;
         case 1:
             goofyAhhRedAllianceStake();
@@ -835,7 +936,7 @@ void autonomous() {
             redRight();
             break;
         case 6:
-            newProvsAuto();
+            //newProvsAuto();
             break;
     }
 
@@ -843,6 +944,7 @@ void autonomous() {
 
 
 void opcontrol() {
+    chassis.setPose(0, 0, 120);
 
     pros::Task controllerFeedbackTask =  pros::Task(controllerFeedback);
     pros::Task armTask = pros::Task(armHandlerFunction);
@@ -861,7 +963,8 @@ void opcontrol() {
         chassis.arcade(leftX, leftY);
 
         controller.get_digital_new_press(DIGITAL_Y) ? clampPiston.toggle() : 0; 
-        controller.get_digital_new_press(DIGITAL_A) ? doinkerPiston.toggle() : 0;
+        controller.get_digital_new_press(DIGITAL_A) ? leftDoinkerPiston.toggle() : 0;
+        controller.get_digital_new_press(DIGITAL_B) ? rightDoinkerPiston.toggle() : 0;
 
         
         pros::delay(10);
