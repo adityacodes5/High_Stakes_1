@@ -26,7 +26,7 @@ void ArmHandler::update() {
             armMotors.tare_position(); // Reset encoder position to 0
             //armMotors.move_relative(-355, 70); // Move 320 degrees relative at 50 rpm
             //armMotors.move_relative(-300, 80);
-            moveArm(-160, 1000, true);
+            moveArm(-205, 1000, true);
 
             isMovingToPosition = true;
             isBraked = false;

@@ -144,7 +144,7 @@ void initialize() {
     
     
     pros::Task screenTask([&]() {
-        std::string autonNames[7] = {"Blue 4 Right", "Red 4 Left", "Blue 3+1 Under Ladder", "Red 3+1 Under Ladder", "Blue 2 Left", "Red 2 Right", "Prog Skills"};  
+        std::string autonNames[7] = {"4 + 1 Blue Qual Left", "4 + 1 Red Qual Right", "Blue Ring Rush Right", "Red Ring Rush Left", "Blue 2 Left", "Red 2 Right", "Prog Skills"};  
         while (true) {
 
             if(bumper.get_new_press()){
@@ -473,7 +473,7 @@ void wallStakeTest(){
 
 void worldsBluePosUnderLadder(bool elims){ //Alliance Stake. Middle ring, under ladder rings
     chassis.setPose(0, 0, 120);//
-    armHandler.moveArm(-160, 375, true);
+    armHandler.moveArm(-205, 375, true);
     intake.move(128);
     pros::delay(350);
     intake.move(0);
@@ -498,34 +498,23 @@ void worldsBluePosUnderLadder(bool elims){ //Alliance Stake. Middle ring, under 
     //chassis.turnToHeading(140, 400);
     chassis.waitUntilDone();
     //roller.move(0);
-    chassis.moveToPose(-12.5, 40, 150,1500, {.forwards = false, .maxSpeed = 70});//
+    chassis.moveToPose(-11.5, 40, 150,1500, {.forwards = false, .maxSpeed = 70});//
     chassis.waitUntil(31);
     clampPiston.extend();
     roller.move(0);
 
-    chassis.turnToPoint(6.5, 51, 700);//
-    chassis.waitUntilDone();
-    intake.move(0);
-    chassis.moveToPoint(6.5, 51, 900);//
-    chassis.turnToHeading(40, 350);// 
-    chassis.waitUntilDone();
-    leftDoinkerPiston.extend();//
-    pros::delay(200);
-    moveLinear(chassis, -2, 200, {.minSpeed = 40});  
-    chassis.turnToHeading(20, 350);//
-    moveLinear(chassis, -38, 800, {.minSpeed = 40});
-    chassis.waitUntil(20);
+    chassis.turnToHeading(270, 550); //!!!!!!!
     gameInit(teamColour::blue);
     intake.move(128);
-    chassis.turnToPoint(-8, 37, 500);//
+    //chassis.turnToPoint(-8, 37, 500);//
     chassis.waitUntilDone();
-    leftDoinkerPiston.retract();//
-    chassis.turnToPoint(-29, 41, 300);//
+    //leftDoinkerPiston.retract();//
+    chassis.turnToPoint(-33, 39, 300);//
     //chassis.moveToPoint(-14, 33, 800, {.maxSpeed = 60});
-    chassis.moveToPoint(-29, 41, 1000);//
+    chassis.moveToPoint(-33, 39, 1000);//
 
     
-    if (!elims){
+    if (elims){
         chassis.moveToPoint(-41, 30, 1000, {.forwards = false});
         chassis.waitUntilDone();
         pros::delay(750);
@@ -536,13 +525,16 @@ void worldsBluePosUnderLadder(bool elims){ //Alliance Stake. Middle ring, under 
         //    armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
         //    armMotors.brake();
         //});
-        chassis.moveToPose(-4, 56, 110, 2000, {.maxSpeed = 75});//
+        chassis.moveToPose(2, 54, 90, 2000);//
         chassis.waitUntilDone();
-        armHandler.moveArm(-1400, 2000, true);
     }
-    if (elims){
-        chassis.moveToPoint(-41, 5, 1100);//
-        chassis.turnToHeading(225, 400);//
+    if (!elims){
+        //leftDoinkerPiston.extend();//
+        chassis.moveToPoint(-43, 22, 700);
+        chassis.moveToPoint(-30, 10, 700);//
+        chassis.waitUntilDone();
+        //leftDoinkerPiston.retract();//
+        chassis.turnToHeading(225, 650);//
 
         //chassis.turnToHeading(180, 400);
         //rightDoinkerPiston.retract();
@@ -554,22 +546,132 @@ void worldsBluePosUnderLadder(bool elims){ //Alliance Stake. Middle ring, under 
             armMotors.brake();
         });
         chassis.waitUntilDone();
-        chassis.setPose(0, 0, 0);
-        moveLinear(chassis, 35, 1300, {.forwards = true, .minSpeed = 50});
-        moveLinear(chassis, -10, 400, {.forwards = false, .minSpeed = 40});
-        moveLinear(chassis, 20, 1000, {.forwards = true, .minSpeed = 40});
-        moveLinear(chassis, -5, 200, {.forwards = false, .minSpeed = 40});
+        //chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(-60, -18, 1700, {.minSpeed = 50});
+        chassis.moveToPoint(-30, 8, 1200, {.forwards = false, .minSpeed = 40});
+        chassis.moveToPoint(-60, -18, 900, {.maxSpeed = 50,.minSpeed = 40});
+        chassis.moveToPoint(-40, 6, 1000, {.forwards = false, .maxSpeed = 30});
+        pros::Task t4([&](){
+            pros::delay(500);
+            armHandler.moveArm(-1200, 2000, true);
+            armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+            armMotors.brake();
+        });
+        chassis.turnToPoint(0, 40, 600);
+        //chassis.turnToHeading(45, 600);
+        chassis.waitUntilDone();
+        pros::delay(500);
+        clampPiston.retract();
+        chassis.moveToPoint(0, 41, 2000);//
+        chassis.waitUntilDone();
+        armHandler.moveArm(-1400, 2000, true);
+        
     }
-    
-
-
-
 
 }
 
-void worldsRedPosUnderLadder(){ //Alliance Stake. Middle ring, under ladder rings
+
+void worldsRedPosUnderLadder(bool elims){ //Alliance Stake. Middle ring, under ladder rings
     chassis.setPose(0, 0, 240);//
-    armHandler.moveArm(-160, 375, true);
+    armHandler.moveArm(-205, 375, true);
+    intake.move(128);
+    pros::delay(350);
+    intake.move(0);
+    armHandler.moveArm(-1400, 1000, true);
+    chassis.moveToPoint(4, 10, 700, {.forwards = false});//
+    intake.move(-128);
+    pros::delay(100);
+    intake.move(0);
+    chassis.turnToPoint(-8, 13, 500);//
+    chassis.waitUntilDone();
+    intakeRamp.extend();
+    roller.move(128);
+    chassis.moveToPoint(-8, 13, 1200, {.maxSpeed = 75});//
+    pros::Task t1([&](){
+        armHandler.moveArm(100, 2000, true);
+        armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        armMotors.brake();
+    });
+    chassis.waitUntil(12);
+    intakeRamp.retract();
+    //chassis.turnToHeading(140, 400);
+    chassis.waitUntilDone();
+    //roller.move(0);
+    chassis.moveToPose(11.75, 40, 210, 1500, {.forwards = false, .maxSpeed = 70});//
+    chassis.waitUntil(31);
+    clampPiston.extend();
+    roller.move(0);
+
+    chassis.turnToHeading(90, 550); //!!!!!!!
+    gameInit(teamColour::red);
+    intake.move(128);
+    //chassis.turnToPoint(-8, 37, 500);//
+    chassis.waitUntilDone();
+    //leftDoinkerPiston.retract();//
+    chassis.turnToPoint(29, 39.5, 300);//
+    //chassis.moveToPoint(-14, 33, 800, {.maxSpeed = 60});
+    chassis.moveToPoint(29, 39.5, 1000);//
+
+    
+    if (elims){
+        chassis.moveToPoint(41, 30, 1000, {.forwards = false});
+        chassis.waitUntilDone();
+        pros::delay(750);
+        clampPiston.retract();
+        //pros::Task t3([&](){
+        //    pros::delay(250);
+        //    armHandler.moveArm(-1200, 2000, true);
+        //    armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        //    armMotors.brake();
+        //});
+        chassis.moveToPose(-2, 54, 270, 2000);//
+        chassis.waitUntilDone();
+    }
+    if (!elims){
+        //leftDoinkerPiston.extend();//
+        chassis.moveToPoint(43, 22, 700);
+        chassis.moveToPoint(30, 8, 700);//
+        chassis.waitUntilDone();
+        //leftDoinkerPiston.retract();//
+        chassis.turnToHeading(135, 400);//
+
+        //chassis.turnToHeading(180, 400);
+        //rightDoinkerPiston.retract();
+        //chassis.moveToPoint(-42, -18, 1000);
+        pros::Task t2([&](){
+            pros::delay(250);
+            armHandler.moveArm(-1400, 2000, true);
+            armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+            armMotors.brake();
+        });
+        chassis.waitUntilDone();
+        //chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(60, -16, 1700, {.minSpeed = 50});
+        chassis.moveToPoint(38, 7, 1200, {.forwards = false, .maxSpeed = 45});
+        chassis.moveToPoint(60, -16, 900, {.maxSpeed = 50,.minSpeed = 40});
+        chassis.moveToPoint(40, 6, 1000, {.forwards = false, .maxSpeed = 30});
+        pros::Task t4([&](){
+            pros::delay(500);
+            armHandler.moveArm(-1200, 2000, true);
+            armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+            armMotors.brake();
+        });
+        chassis.turnToPoint(0, 40, 600);
+        //chassis.turnToHeading(45, 600);
+        chassis.waitUntilDone();
+        pros::delay(500);
+        clampPiston.retract();
+        chassis.moveToPoint(0, 40, 2000);//
+        chassis.waitUntilDone();
+        armHandler.moveArm(-1400, 2000, true);
+        
+    }
+
+}
+
+void OLDworldsRedPosUnderLadder(){ //Alliance Stake. Middle ring, under ladder rings
+    chassis.setPose(0, 0, 240);//
+    armHandler.moveArm(-205, 375, true);
     intake.move(128);
     pros::delay(350);
     intake.move(0);
@@ -649,7 +751,7 @@ void redRingRush(){
     chassis.setPose(0, 0, 340);
     leftDoinkerPiston.extend();
     roller.move(128);
-    chassis.moveToPoint(-15, 40.5, 1000);
+    chassis.moveToPoint(-15, 37.5, 1000);
     chassis.moveToPoint(4, 24, 1000, {.forwards = false, .maxSpeed = 60});
     chassis.waitUntil(26);
     clampPiston.extend();
@@ -668,6 +770,7 @@ void redRingRush(){
     chassis.moveToPoint(-46, -24, 900, {.maxSpeed = 50,.minSpeed = 40});
     chassis.moveToPoint(-26, -4, 1000, {.forwards = false, .maxSpeed = 30});
     chassis.moveToPoint(-4, -6, 1000,  {.maxSpeed = 70});
+    chassis.turnToPoint(38, 5, 600);
     chassis.moveToPoint(38, 38, 2000, {.maxSpeed = 60});
     //moveLinear(chassis, 46, 1000, {.minSpeed = 50});
 
@@ -680,7 +783,7 @@ void blueRingRush(){
     chassis.setPose(0, 0, 20); //
     rightDoinkerPiston.extend();//
     roller.move(128);
-    chassis.moveToPoint(15, 40.5, 1000);//
+    chassis.moveToPoint(15, 38, 1000);//
     chassis.moveToPoint(-4, 24, 1000, {.forwards = false, .maxSpeed = 60});//
     chassis.waitUntil(26);
     clampPiston.extend();
@@ -699,8 +802,66 @@ void blueRingRush(){
     chassis.moveToPoint(46, -24, 900, {.maxSpeed = 50,.minSpeed = 40});//
     chassis.moveToPoint(26, -4, 1000, {.forwards = false, .maxSpeed = 30});//
     chassis.moveToPoint(4, -6, 1000,  {.maxSpeed = 70});//
+
+    chassis.turnToPoint(-38, 5, 600);
+    chassis.moveToPoint(-38, 38, 2000, {.maxSpeed = 60});
     //chassis.moveToPoint(-38, 38, 2000, {.maxSpeed = 60});//
     //moveLinear(chassis, 46, 1000, {.minSpeed = 50});
+
+
+}
+
+void redAllianceStakeRings(){
+    chassis.setPose(0, 0, 120);//
+    armHandler.moveArm(-205, 375, true);
+    intake.move(128);
+    pros::delay(350);
+    intake.move(0);
+    armHandler.moveArm(-1400, 1000, true);
+    chassis.moveToPoint(-4, 10, 700, {.forwards = false});//
+    intake.move(-128);
+    pros::delay(100);
+    intake.move(0);
+    //moveLinear(chassis, -5, 1000, {.forwards = false});
+    chassis.turnToPoint(8, 13, 500);//
+    chassis.waitUntilDone();
+    intakeRamp.extend();
+    roller.move(128);
+    chassis.moveToPoint(8, 13, 1200, {.maxSpeed = 75});//
+    pros::Task t1([&](){
+        armHandler.moveArm(100, 2000, true);
+        armMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        armMotors.brake();
+    });
+    chassis.waitUntil(12);
+    intakeRamp.retract();
+    //chassis.turnToHeading(140, 400);
+    chassis.waitUntilDone();
+    //roller.move(0);
+    chassis.moveToPose(-11.5, 40, 150,1500, {.forwards = false, .maxSpeed = 70});//
+    chassis.waitUntil(31);
+    clampPiston.extend();
+    roller.move(0);
+
+    intake.move(128);
+    gameInit(teamColour::red);
+    chassis.turnToPoint(-37, 51.5, 500);
+    chassis.moveToPoint(-37, 51.5, 800);
+    chassis.turnToHeading(270, 425);
+    chassis.moveToPoint(-52, 50, 800, {.maxSpeed = 65});
+    chassis.moveToPoint(-15, 48, 800, {.forwards = false, .minSpeed = 60});
+    chassis.turnToPoint(-36, 39, 300);
+    chassis.moveToPoint(-36, 39, 700);
+
+    chassis.turnToHeading(225, 650);
+
+    chassis.moveToPoint(-60, -18, 1700, {.minSpeed = 50});
+    chassis.moveToPoint(-30, 8, 1200, {.forwards = false, .minSpeed = 40});
+    //xschassis.moveToPoint(-60, -18, 900, {.maxSpeed = 50,.minSpeed = 40});
+    //xschassis.moveToPoint(-40, 6, 1000, {.forwards = false, .maxSpeed = 30});
+    chassis.turnToPoint(4, 30, 400);
+    chassis.moveToPoint(4, 30, 2000, {.maxSpeed = 50});
+
 
 
 }
@@ -716,12 +877,13 @@ void autonomous() {
             worldsBluePosUnderLadder(false); //TEMPORARY
             break;
         case 1:
-            newSigRedLeft4Ring();
+            worldsRedPosUnderLadder(false);
             break;
         case 2:
-            worldsBluePosUnderLadder(true);
+            blueRingRush();
             break;
         case 3:
+            redRingRush();
             break;
         case 4:
             gameInit(teamColour::blue);
@@ -759,6 +921,7 @@ void opcontrol() {
         controller.get_digital_new_press(DIGITAL_Y) ? clampPiston.toggle() : 0; 
         controller.get_digital_new_press(DIGITAL_A) ? leftDoinkerPiston.toggle() : 0;
         controller.get_digital_new_press(DIGITAL_B) ? rightDoinkerPiston.toggle() : 0;
+        controller.get_digital_new_press(DIGITAL_UP) ? intakeRamp.toggle() : 0;
 
         
         pros::delay(10);
